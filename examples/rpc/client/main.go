@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"image"
 	"image/color"
 	"log"
@@ -67,8 +66,6 @@ func main() {
 	server_viewport := Viewport{image.Rect(0, 0, width, height)}
 	log.Printf("Server geometry: %dx%d\n", width, height)
 
-	tk := rgbmatrix.NewToolKit(m)
-
 	panel_rows, panel_cols := *panel_rows, *panel_cols
 	stacked_wide, stacked_high := *stacked_wide, *stacked_high
 
@@ -90,7 +87,6 @@ func main() {
 			stacked_wide, stacked_high,
 		)
 	}
-
 	log.Printf(
 		"Transform: %s => %s @%d:%d\n",
 		server_viewport.Size(),
@@ -98,52 +94,40 @@ func main() {
 		stacked_wide, stacked_high,
 	)
 
+	tk := rgbmatrix.NewToolKit(m)
 	tk.Transform = func(img image.Image) *image.NRGBA {
 		// resize to match our geometry
 		src := imaging.Resize(img, stack.Dx(), stack.Dy(), imaging.Lanczos)
 		dst := imaging.New(server_viewport.Dx(), server_viewport.Dy(), color.Black)
-		fmt.Printf("\n--- %s --- %s => %s \n", stack.Size(), src.Rect.Size(), dst.Rect.Size())
-
 		dst_stacked_wide := dst.Rect.Max.X / panel_cols
+		//fmt.Printf("\n--- %s --- %s => %s \n", stack.Size(), src.Rect.Size(), dst.Rect.Size())
 
-		var slice image.Image
-		var start_pos, end_pos image.Point
-		var dst_start_pos, dst_end_pos image.Point
-		var rect, dst_rect image.Rectangle
-
-		x, y := 0, 0
-		dx, dy := 0, 0
-
+		var x, y, dx, dy int
 		for idx := range iter.N(stack.PanelCount()) {
-			start_pos = image.Pt(x*panel_cols, y*panel_rows)
-			dst_start_pos = image.Pt(dx*panel_cols, dy*panel_rows)
+			start_pos := image.Pt(x*panel_cols, y*panel_rows)
+			dst_start_pos := image.Pt(dx*panel_cols, dy*panel_rows)
+			end_pos := image.Pt(start_pos.X+panel_cols, start_pos.Y+panel_rows)
+			rect := image.Rectangle{start_pos, end_pos}
+			//fmt.Printf(" idx=%d (%d,%d) %s \t=> %s\n", idx, x, y, rect, dst_rect)
 
-			end_pos = image.Pt(start_pos.X+panel_cols, start_pos.Y+panel_rows)
-			dst_end_pos = image.Pt(dst_start_pos.X+panel_cols, dst_start_pos.Y+panel_rows)
-
-			rect = image.Rectangle{start_pos, end_pos}
-			dst_rect = image.Rectangle{dst_start_pos, dst_end_pos}
-
-			fmt.Printf(" idx=%d (%d,%d) %s \t=> %s\n", idx, x, y, rect, dst_rect)
-
-			slice = src.SubImage(rect)
-
+			slice := src.SubImage(rect)
 			dst = imaging.Paste(dst, slice, dst_start_pos)
 
 			x++
 			if x == stacked_wide {
-				y++
 				x = 0
+				y++
 			}
 
 			dx++
 			if dx == dst_stacked_wide {
-				dy++
 				dx = 0
+				dy++
 			}
+
+			idx++
 		}
 
-		err = imaging.Save(dst, "omg.png")
 		return dst
 	}
 
