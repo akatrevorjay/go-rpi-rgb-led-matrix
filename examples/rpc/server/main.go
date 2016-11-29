@@ -9,9 +9,9 @@ import (
 
 var (
 	rows       = flag.Int("led-rows", 32, "number of rows supported")
-	chain      = flag.Int("led-chain", 2, "number of displays daisy-chained")
+	chain      = flag.Int("led-chain", 6, "number of displays daisy-chained")
 	parallel   = flag.Int("led-parallel", 1, "number of daisy-chained panels")
-	brightness = flag.Int("brightness", 100, "brightness (0-100)")
+	brightness = flag.Int("brightness", 10, "brightness (0-100)")
 )
 
 func main() {
@@ -25,6 +25,10 @@ func main() {
 	fatal(err)
 
 	rpc.Serve(m)
+}
+
+func init() {
+	flag.Parse()
 }
 
 func fatal(err error) {

@@ -35,7 +35,7 @@ import (
 // DefaultConfig default WS281x configuration
 var DefaultConfig = HardwareConfig{
 	Rows:              32,
-	ChainLength:       1,
+	ChainLength:       6,
 	Parallel:          1,
 	PWMBits:           11,
 	PWMLSBNanoseconds: 130,
@@ -147,8 +147,12 @@ func (c *RGBLedMatrix) Geometry() (width, height int) {
 
 // Apply set all the pixels to the values contained in leds
 func (c *RGBLedMatrix) Apply(leds []color.Color) error {
+	size := c.width * c.height
+
 	for position, l := range leds {
-		c.Set(position, l)
+		if position < size {
+			c.Set(position, l)
+		}
 	}
 
 	return c.Render()

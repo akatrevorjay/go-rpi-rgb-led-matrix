@@ -12,9 +12,9 @@ import (
 var (
 	rows       = flag.Int("led-rows", 32, "number of rows supported")
 	parallel   = flag.Int("led-parallel", 1, "number of daisy-chained panels")
-	chain      = flag.Int("led-chain", 2, "number of displays daisy-chained")
+	chain      = flag.Int("led-chain", 6, "number of displays daisy-chained")
 	brightness = flag.Int("brightness", 100, "brightness (0-100)")
-	img        = flag.String("image", "", "image path")
+	img        = flag.String("image", "play.gif", "image path")
 
 	rotate = flag.Int("rotate", 0, "rotate angle, 90, 180, 270")
 )

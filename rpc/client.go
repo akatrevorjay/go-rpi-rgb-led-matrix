@@ -31,7 +31,7 @@ func NewClient(network, addr string) (rgbmatrix.Matrix, error) {
 		network: network,
 		addr:    addr,
 		client:  client,
-		leds:    make([]color.Color, 2048),
+		leds:    make([]color.Color, 20480),
 	}, nil
 }
 
@@ -47,7 +47,7 @@ func (c *Client) Geometry() (width, height int) {
 }
 
 func (c *Client) Apply(leds []color.Color) error {
-	defer func() { c.leds = make([]color.Color, 2048) }()
+	defer func() { c.leds = make([]color.Color, 20480) }()
 
 	var reply *ApplyReply
 	return c.client.Call("RPCMatrix.Apply", &ApplyArgs{Colors: leds}, &reply)
